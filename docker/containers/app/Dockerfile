@@ -2,7 +2,7 @@ FROM php:7.4-fpm
 
 RUN apt-get update && \
     apt-get install -qy --no-install-recommends \
-        git libmcrypt-dev libpq-dev zip unzip wget openssl postgresql-client npm libzip-dev
+        git libmcrypt-dev libpq-dev zip unzip wget openssl postgresql-client libzip-dev
 
 RUN docker-php-ext-configure zip && \
     docker-php-ext-install pdo_pgsql bcmath zip

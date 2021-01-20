@@ -27,3 +27,11 @@ services:
     env_file: containers/db/.env
     volumes:
       - ../_data/postgres_data:/var/lib/postgresql/data
+
+  node:
+    container_name: ${PROJECT_NAME}_node
+    image: node:latest
+    volumes:
+      - ..:/var/www/html
+    working_dir: /var/www/html/app
+    tty: true
