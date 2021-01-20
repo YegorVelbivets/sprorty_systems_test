@@ -1,0 +1,29 @@
+version: '3.7'
+services:
+  nginx:
+    container_name: ${PROJECT_NAME}_nginx
+    image: nginx:latest
+    volumes:
+      - ./containers/nginx/conf.d:/etc/nginx/conf.d
+      - ..:/var/www/html
+    links:
+      - app
+
+  app:
+    container_name: ${PROJECT_NAME}_app
+    build: ./containers/app
+    environment:
+      # for Xdebug, PHPStorm
+      PHP_IDE_CONFIG: "serverName=${PROJECT_NAME}"
+    volumes:
+      - ..:/var/www/html
+      - ./containers/app/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+    links:
+      - postgres
+
+  postgres:
+    container_name: ${PROJECT_NAME}_postgres
+    image: postgres:latest
+    env_file: containers/db/.env
+    volumes:
+      - ../_data/postgres_data:/var/lib/postgresql/data
