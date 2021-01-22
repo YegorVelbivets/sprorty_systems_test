@@ -33,7 +33,6 @@ export default {
             email : "",
             password : "",
             password_confirmation : "",
-            is_admin : null
         }
     },
     methods: {
@@ -42,7 +41,7 @@ export default {
                 name: this.name,
                 email: this.email,
                 password: this.password,
-                is_admin: this.is_admin
+                password_confirmation: this.password_confirmation
             }
             this.$store.dispatch('register', data)
                 .then(() => this.$router.push('/'))
