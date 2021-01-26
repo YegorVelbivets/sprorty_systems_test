@@ -5,6 +5,7 @@
             <label for="name">Name</label>
             <div>
                 <input id="name" type="text" v-model="name" required autofocus>
+
             </div>
             <label for="email" >E-Mail Address</label>
             <div>
@@ -13,6 +14,11 @@
             <label for="password">Password</label>
             <div>
                 <input id="password" type="password" v-model="password" required>
+                <div v-if="errors['password']">
+                    <ul v-for="error in errors['password']">
+                        <li> {{ error }} </li>
+                    </ul>
+                </div>
             </div>
             <label for="password-confirm">Confirm Password</label>
             <div>
@@ -47,6 +53,11 @@ export default {
                 .then(() => this.$router.push('/'))
                 .catch(err => console.log(err))
         }
+    },
+    computed: {
+      errors() {
+          return this.$store.getters.errors;
+      }
     }
 }
 </script>

@@ -6,74 +6,62 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
-        status: '',
-        token: localStorage.getItem('token') || '',
-        user : {}
+        user: {},
+        errors: []
     },
 
     mutations: {
-        auth_request(state){
-            state.status = 'loading'
+        request_error(state, response){
+            state.errors = response.data.errors;
         },
-        auth_success(state, token, user){
-            state.status = 'success'
-            state.token = token
-            state.user = user
-        },
-        auth_error(state){
-            state.status = 'error'
-        },
-        logout(state){
-            state.status = ''
-            state.token = ''
-        }
     },
 
     actions: {
-        login({commit}, user){
+        login({commit, dispatch}, user){
             return new Promise((resolve, reject) => {
-                commit('auth_request')
-                axios({url: 'http://localhost:3000/login', data: user, method: 'POST' })
+                axios({
+                    url: '/oauth/token',
+                    data: {
+                        grant_type: 'password',
+                        client_id: '2',
+                        client_secret: 'Dj1VkawSaUFiGARXEa2oWh52XFLpl0icyWYkMZRl',
+                        username: user.email,
+                        password: user.password,
+                        scope: '*'
+                    },
+                    method: 'POST'
+                })
                     .then(resp => {
-                        const token = resp.data.token
-                        const user = resp.data.user
-                        localStorage.setItem('token', token)
-                        axios.defaults.headers.common['Authorization'] = token
-                        commit('auth_success', token, user)
-                        resolve(resp)
+                        localStorage.setItem('access_token', resp.data.access_token);
+                        localStorage.setItem('refresh_token', resp.data.refresh_token);
+                        resolve(resp);
                     })
                     .catch(err => {
-                        commit('auth_error')
-                        localStorage.removeItem('token')
-                        reject(err)
+                        commit('request_error', err.response);
+                        dispatch('logout');
+                        reject(err);
                     })
             })
         },
 
-        register({commit}, user){
+        register({commit, dispatch}, user){
             return new Promise((resolve, reject) => {
-                commit('auth_request')
                 axios({url: '/api/auth/register', data: user, method: 'POST' })
                     .then(resp => {
-                        const token = resp.data.token
-                        const user = resp.data.user
-                        localStorage.setItem('token', token)
-                        axios.defaults.headers.common['Authorization'] = token
-                        commit('auth_success', token, user)
-                        resolve(resp)
+                        resolve(resp);
                     })
                     .catch(err => {
-                        commit('auth_error', err)
-                        localStorage.removeItem('token')
-                        reject(err)
+                        commit('request_error', err.response);
+                        dispatch('logout');
+                        reject(err);
                     })
             })
         },
 
         logout({commit}){
             return new Promise((resolve, reject) => {
-                commit('logout')
-                localStorage.removeItem('token')
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
                 delete axios.defaults.headers.common['Authorization']
                 resolve()
             })
@@ -81,7 +69,9 @@ export default new Vuex.Store({
     },
 
     getters : {
-        isLoggedIn: state => !!state.token,
-        authStatus: state => state.status,
+        isLoggedIn: (state, getters) => !!getters.access_token,
+        errors: state => state.errors,
+        access_token: () => localStorage.getItem('access_token'),
+        refresh_token: () => localStorage.getItem('refresh_token'),
     }
 });
