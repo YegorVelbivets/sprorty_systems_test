@@ -17,4 +17,9 @@ Route::group(['namespace' => 'Api'], function() {
     Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
         Route::post('register', [\App\Http\Controllers\Api\Auth\RegisterController::class, 'register']);
     });
+
+    Route::middleware('auth:api')->group(function () {
+        Route::get('/profile', [\App\Http\Controllers\Api\User\ProfileController::class, 'show']);
+    });
+
 });
